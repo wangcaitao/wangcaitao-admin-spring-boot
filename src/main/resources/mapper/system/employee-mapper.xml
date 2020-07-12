@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wangcaitao.admin.system.mapper.EmployeeMapper">
+
+    <resultMap id="employeeBoResult" type="EmployeeBO">
+        <result column="employee_id" property="id"/>
+        <result column="employee_name" property="name"/>
+        <result column="phone_number" property="phoneNumber"/>
+        <result column="avatar_img_url" property="avatarImgUrl"/>
+        <result column="account_status_code" property="accountStatusCode"/>
+        <result column="status_code" property="statusCode"/>
+        <result column="job_number" property="jobNumber"/>
+        <result column="email" property="email"/>
+        <result column="gender_code" property="genderCode"/>
+        <result column="create_gmt" property="createGmt"/>
+        <result column="modified_gmt" property="modifiedGmt"/>
+        <result column="role_id" property="roleId"/>
+        <result column="role_name" property="roleName"/>
+        <collection property="departments" ofType="EmployeeDepartmentBO">
+            <result column="department_id" property="departmentId"/>
+            <result column="department_name" property="departmentName"/>
+        </collection>
+        <collection property="positions" ofType="EmployeePositionBO">
+            <result column="position_id" property="positionId"/>
+            <result column="position_name" property="positionName"/>
+        </collection>
+    </resultMap>
+
+    <select id="getById" resultMap="employeeBoResult">
+        select employee.id employee_id,
+        employee.name employee_name,
+        employee.phone_number,
+        employee.avatar_img_url,
+        employee.account_status_code,
+        employee.status_code,
+        employee.job_number,
+        employee.email,
+        employee.gender_code,
+        employee.create_gmt,
+        employee.modified_gmt,
+        ifnull(role.id, 0) role_id,
+        ifnull(role.name, '') role_name,
+        department.id department_id,
+        department.name department_name,
+        position.id position_id,
+        position.name position_name
+        from employee
+        left join employee_role on employee.id = employee_role.employee_id
+        left join role on employee_role.role_id = role.id
+        left join employee_department on employee.id = employee_department.employee_id
+        left join department on employee_department.department_id = department.id
+        left join employee_position on employee.id = employee_position.employee_id
+        left join position on employee_position.position_id = position.id
+        where employee.id = #{id} and employee.id != 1
+    </select>
+
+    <select id="listIds" parameterType="employeeQuery" resultType="Long">
+        <choose>
+            <when test="null != departmentId and departmentId > 0">
+                select
+                employee.id
+                from employee
+                left join employee_department on employee.id = employee_department.employee_id
+                left join department on employee_department.department_id = department.id
+                <where>
+                    employee.id != 1 and department.id = #{departmentId}
+                    <if test="null != statusCode and '' != statusCode">and employee.status_code = #{statusCode}</if>
+                    <if test="null != phoneNumber and '' != phoneNumber">and employee.phone_number = #{phoneNumber}</if>
+                    <if test="null != name and '' != name">and employee.name like concat(#{name} '%')</if>
+                </where>
+            </when>
+            <otherwise>
+                select id from employee
+                <where>
+                    employee.id != 1
+                    <if test="null != statusCode and '' != statusCode">and employee.status_code = #{statusCode}</if>
+                    <if test="null != phoneNumber and '' != phoneNumber">and employee.phone_number = #{phoneNumber}</if>
+                    <if test="null != name and '' != name">and employee.name like concat(#{name} '%')</if>
+                </where>
+            </otherwise>
+        </choose>
+    </select>
+
+    <select id="listByIds" parameterType="employeeQuery" resultMap="employeeBoResult">
+        select employee.id employee_id,
+        employee.name employee_name,
+        employee.phone_number,
+        employee.avatar_img_url,
+        employee.account_status_code,
+        employee.status_code,
+        employee.job_number,
+        employee.email,
+        employee.gender_code,
+        employee.create_gmt,
+        employee.modified_gmt,
+        ifnull(role.id, 0) role_id,
+        ifnull(role.name, '') role_name,
+        department.id department_id,
+        department.name department_name,
+        position.id position_id,
+        position.name position_name
+        from employee
+        left join employee_role on employee.id = employee_role.employee_id
+        left join role on employee_role.role_id = role.id
+        left join employee_department on employee.id = employee_department.employee_id
+        left join department on employee_department.department_id = department.id
+        left join employee_position on employee.id = employee_position.employee_id
+        left join position on employee_position.position_id = position.id
+        <where>
+            employee.id in
+            <foreach collection="ids" item="id" index="index" open="(" separator="," close=")">#{id}</foreach>
+        </where>
+        order by employee.name asc
+    </select>
+</mapper>

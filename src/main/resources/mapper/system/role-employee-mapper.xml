@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wangcaitao.admin.system.mapper.RoleEmployeeMapper">
+
+    <select id="list" parameterType="RoleEmployeeQuery" resultType="RoleEmployeeBO">
+        <choose>
+            <when test="null != relationStatusCode and 0 == relationStatusCode">
+                select employee.id employee_id, employee.name employee_name, employee.phone_number
+                from employee
+                where employee.id != 1
+                and employee.id not in (select employee_id from employee_role where role_id = #{roleId})
+            </when>
+            <otherwise>
+                select employee_role.id, role.name role_name, employee.name employee_name, employee.phone_number
+                from employee_role
+                left join employee on employee_role.employee_id = employee.id
+                left join role on employee_role.role_id = role.id
+                where employee_role.role_id = #{roleId} and employee.id != 1
+            </otherwise>
+        </choose>
+        <if test="null != employeeName and '' != employeeName">and employee.name like concat(#{employeeName} '%')</if>
+        <if test="null != phoneNumber and '' != phoneNumber">and employee.phone_number = #{phoneNumber}</if>
+    </select>
+</mapper>

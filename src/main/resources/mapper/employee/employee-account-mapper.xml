@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wangcaitao.admin.employee.mapper.EmployeeAccountMapper">
+
+    <resultMap id="getByPhoneNumberResult" type="EmployeeAccountBO">
+        <result column="employee_id" property="id"/>
+        <result column="employee_name" property="name"/>
+        <result column="phone_number" property="phoneNumber"/>
+        <result column="password" property="password"/>
+        <result column="avatar_img_url" property="avatarImgUrl"/>
+        <result column="account_status_code" property="accountStatusCode"/>
+        <result column="status_code" property="statusCode"/>
+        <result column="role_id" property="roleId"/>
+    </resultMap>
+
+    <select id="getByPhoneNumber" resultMap="getByPhoneNumberResult">
+        select employee.id employee_id,
+        employee.name employee_name,
+        employee.phone_number,
+        employee.password,
+        employee.avatar_img_url,
+        employee.account_status_code,
+        employee.status_code,
+        employee_role.role_id
+        from employee
+        left join employee_role on employee.id = employee_role.employee_id
+        where employee.phone_number = #{phoneNumber}
+    </select>
+
+    <resultMap id="profileResult" type="EmployeeAccountBO">
+        <result column="employee_id" property="id"/>
+        <result column="employee_name" property="name"/>
+        <result column="phone_number" property="phoneNumber"/>
+        <result column="avatar_img_url" property="avatarImgUrl"/>
+        <result column="job_number" property="jobNumber"/>
+        <result column="email" property="email"/>
+        <result column="gender_code" property="genderCode"/>
+        <result column="create_gmt" property="createGmt"/>
+        <collection property="departmentNames" ofType="String">
+            <result column="department_name" property="departmentName"/>
+        </collection>
+        <collection property="positionNames" ofType="String">
+            <result column="position_name" property="positionName"/>
+        </collection>
+    </resultMap>
+
+    <select id="profile" resultMap="profileResult">
+        select employee.id employee_id,
+        employee.name employee_name,
+        employee.phone_number,
+        employee.avatar_img_url,
+        employee.job_number,
+        employee.email,
+        employee.gender_code,
+        employee.create_gmt,
+        department.name department_name,
+        position.name position_name
+        from employee
+        left join employee_role on employee.id = employee_role.employee_id
+        left join employee_department on employee.id = employee_department.employee_id
+        left join department on employee_department.department_id = department.id
+        left join employee_position on employee.id = employee_position.employee_id
+        left join position on employee_position.position_id = position.id
+        where employee.id = #{employeeId}
+    </select>
+</mapper>

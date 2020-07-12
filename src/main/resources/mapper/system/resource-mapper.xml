@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wangcaitao.admin.system.mapper.ResourceMapper">
+
+    <select id="listChildren" resultType="ResourceBO">
+        select resource.id,
+        resource.status_code,
+        resource.name,
+        resource.url,
+        resource.request_method,
+        resource.type_code,
+        resource.icon,
+        resource.create_gmt,
+        resource.modified_gmt
+        from resource
+        left join resource_relation on resource.id = resource_relation.child_id
+        <where>
+            <choose>
+                <when test="null != parentId and parentId > 0">
+                    and resource_relation.parent_id = #{parentId}
+                    and resource_relation.depth = 1
+                </when>
+                <otherwise>
+                    and resource.top_status_code = 1
+                </otherwise>
+            </choose>
+            <if test="null != statusCode">
+                and resource.status_code = #{statusCode}
+            </if>
+        </where>
+        order by resource.sort asc
+    </select>
+
+    <select id="getMaxSortByParentId" resultType="Integer">
+        select resource.sort
+        from resource
+        left join resource_relation on resource.id = resource_relation.child_id
+        where resource_relation.parent_id = #{parentId} and depth = 1
+        order by resource.sort desc
+        limit 1
+    </select>
+
+    <select id="getAdjoinEntity" resultType="ResourceDO">
+        select resource.id,
+        resource.sort
+        from resource
+        left join resource_relation on resource.id = resource_relation.child_id
+        where resource_relation.parent_id = #{parentId}
+        and resource_relation.depth = 1
+        <choose>
+            <when test="1 == moveTypeCode">
+                and resource.sort &lt; #{sort}
+                order by resource.sort desc
+                limit 1
+            </when>
+            <when test="2 == moveTypeCode">
+                and resource.sort &gt; #{sort}
+                order by resource.sort asc
+                limit 1
+            </when>
+        </choose>
+    </select>
+
+    <select id="listTreeChildren" resultType="ResourceTreeBO">
+        select resource.id,
+        resource.name,
+        resource.url,
+        resource.request_method,
+        resource.type_code,
+        resource.icon
+        from resource
+        left join resource_relation on resource.id = resource_relation.child_id
+        <where>
+            resource.status_code = 1
+            <choose>
+                <when test="null != parentId and parentId > 0">
+                    and resource_relation.parent_id = #{parentId}
+                    and resource_relation.depth = 1
+                </when>
+                <otherwise>
+                    and resource.top_status_code = 1
+                </otherwise>
+            </choose>
+        </where>
+        order by resource.sort asc
+    </select>
+
+    <select id="listParentResourceNameByChildId" resultType="String">
+        select parent_resource.name from resource_relation
+        left join resource parent_resource on resource_relation.parent_id = parent_resource.id
+        where resource_relation.child_id = #{childId}
+        order by resource_relation.depth desc
+    </select>
+</mapper>

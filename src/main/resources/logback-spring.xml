@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <springProperty scope="context" name="spring.application.name" source="spring.application.name"/>
+    <property name="log.home" value="./logs/${spring.application.name}"/>
+
+    <!-- region console log -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%5p] ${PID:- } --- [%20.20t] %-60.60logger{59} : %5L : %m%n</pattern>
+            <charset>utf8</charset>
+        </encoder>
+    </appender>
+    <appender name="console-async" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>256</queueSize>
+        <appender-ref ref="console"/>
+    </appender>
+    <!-- endregion -->
+
+    <!-- region error file log -->
+    <appender name="error" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%5p] ${PID:- } --- [%20.20t] %-60.60logger{59} : %5L : %m%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${log.home}/error/%d{yyyy-MM-dd}-error-%i.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <maxFileSize>10MB</maxFileSize>
+        </rollingPolicy>
+    </appender>
+    <appender name="error-async" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>256</queueSize>
+        <appender-ref ref="error"/>
+    </appender>
+    <!-- endregion -->
+
+    <!-- region info file log -->
+    <appender name="info" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%5p] ${PID:- } --- [%20.20t] %-60.60logger{59} : %5L : %m%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${log.home}/info/%d{yyyy-MM-dd}-info-%i.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <maxFileSize>10MB</maxFileSize>
+        </rollingPolicy>
+    </appender>
+    <appender name="info-async" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>512</queueSize>
+        <appender-ref ref="info"/>
+    </appender>
+    <!-- endregion -->
+
+    <!-- region warn file log -->
+    <appender name="warn" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%5p] ${PID:- } --- [%20.20t] %-60.60logger{59} : %5L : %m%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>WARN</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${log.home}/warn/%d{yyyy-MM-dd}-warn-%i.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <maxFileSize>10MB</maxFileSize>
+        </rollingPolicy>
+    </appender>
+    <appender name="warn-async" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>256</queueSize>
+        <appender-ref ref="warn"/>
+    </appender>
+    <!-- endregion -->
+
+    <!-- region debug file log -->
+    <appender name="debug" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <encoder>
+            <pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [%5p] ${PID:- } --- [%20.20t] %-60.60logger{59} : %5L : %m%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>DEBUG</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>${log.home}/debug/%d{yyyy-MM-dd}-debug-%i.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+            <maxFileSize>10MB</maxFileSize>
+        </rollingPolicy>
+    </appender>
+    <appender name="debug-async" class="ch.qos.logback.classic.AsyncAppender">
+        <discardingThreshold>0</discardingThreshold>
+        <queueSize>256</queueSize>
+        <appender-ref ref="debug"/>
+    </appender>
+    <!-- endregion -->
+
+    <!-- region spring profile -->
+    <springProfile name="local">
+        <root level="INFO">
+            <appender-ref ref="console"/>
+            <appender-ref ref="error"/>
+            <appender-ref ref="warn"/>
+            <appender-ref ref="info"/>
+            <appender-ref ref="debug"/>
+        </root>
+    </springProfile>
+    <springProfile name="dev">
+        <root level="INFO">
+            <appender-ref ref="console"/>
+            <appender-ref ref="error"/>
+            <appender-ref ref="warn"/>
+            <appender-ref ref="info"/>
+            <appender-ref ref="debug"/>
+        </root>
+    </springProfile>
+    <springProfile name="test">
+        <root level="INFO">
+            <appender-ref ref="error"/>
+            <appender-ref ref="warn"/>
+            <appender-ref ref="info"/>
+            <appender-ref ref="debug"/>
+        </root>
+    </springProfile>
+    <springProfile name="prod">
+        <root level="INFO">
+            <appender-ref ref="error"/>
+            <appender-ref ref="warn"/>
+            <appender-ref ref="info"/>
+            <appender-ref ref="debug"/>
+        </root>
+    </springProfile>
+    <!-- endregion -->
+</configuration>

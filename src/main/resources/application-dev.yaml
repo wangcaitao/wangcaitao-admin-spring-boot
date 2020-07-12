@@ -1,0 +1,76 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/admin?createDatabaseIfNotExist=true&useUnicode=true&characterEncoding=utf-8&useSSL=false
+    username: admin
+    password: admin
+    type: com.alibaba.druid.pool.DruidDataSource
+    druid:
+      initial-size: 1
+      min-idle: 1
+      max-active: 8
+      max-wait: 60000
+      use-unfair-lock: true
+      time-between-eviction-runs-millis: 60000
+      min-evictable-idle-time-millis: 300000
+      validation-query: SELECT 'x'
+      test-while-idle: true
+      test-on-borrow: false
+      test-on-return: false
+      filters: wall
+  redis:
+    database: 0
+    host: localhost
+    port: 6379
+    password: password
+    jedis:
+      pool:
+        max-active: 8
+        max-idle: 8
+        min-idle: 0
+
+mybatis-plus:
+  mapper-locations: classpath:mapper/**/*-mapper.xml
+  type-aliases-package: com.wangcaitao.admin.**.entity
+  global-config:
+    banner: false
+    db-config:
+      id-type: auto
+  configuration:
+    cache-enabled: false
+
+qiniu:
+  oss:
+    access-key:
+    secret-key:
+    bucket:
+    base-url:
+    base-key:
+
+router:
+  ignored:
+    authentications:
+      - {method: "POST", url: "/login"}
+    authorizations:
+      - {method: "PUT", url: "/logout"}
+      - {method: "POST", url: "/upload"}
+      - {method: "POST", url: "/upload-batch"}
+      - {method: "GET", url: "/account-profile"}
+      - {method: "PUT", url: "/account"}
+      - {method: "PUT", url: "/account-avatar"}
+      - {method: "PUT", url: "/account-password"}
+      - {method: "GET", url: "/dict-tree"}
+      - {method: "GET", url: "/dict-code/{parentCode}/{codes}"}
+      - {method: "GET", url: "/dict-code/{parentCode}"}
+    extend:
+      save-operation-log-params:
+        - {method: "POST", url: "/login"}
+        - {method: "PUT", url: "/logout"}
+        - {method: "POST", url: "/upload"}
+        - {method: "POST", url: "/upload-batch"}
+        - {method: "PUT", url: "/account-password"}
+
+logging:
+  level:
+    com:
+      wangcaitao: debug

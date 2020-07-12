@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wangcaitao.admin.system.mapper.RoleResourceMapper">
+
+    <select id="listMenuResourceId" resultType="Long">
+        select distinct(resource_relation.parent_id) parent_resource_id
+        from role_resource
+        left join resource_relation on role_resource.resource_id = resource_relation.child_id
+        where resource_relation.depth > 0 and role_resource.role_id = #{roleId}
+    </select>
+
+    <select id="listButtonResource" resultType="String">
+        select concat(resource.request_method, resource.url) from role_resource
+        left join resource on role_resource.resource_id = resource.id
+        where role_resource.role_id = #{roleId} and resource.type_code = 2
+    </select>
+</mapper>

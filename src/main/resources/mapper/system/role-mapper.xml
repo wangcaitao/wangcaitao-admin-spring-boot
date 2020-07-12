@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wangcaitao.admin.system.mapper.RoleMapper">
+
+    <resultMap id="roleBoResult" type="RoleBO">
+        <result column="role_id" property="id"/>
+        <result column="code" property="code"/>
+        <result column="name" property="name"/>
+        <result column="create_gmt" property="createGmt"/>
+        <result column="modified_gmt" property="modifiedGmt"/>
+        <collection property="resourceIds" ofType="Long">
+            <result column="resource_id" property="resourceId"/>
+        </collection>
+    </resultMap>
+
+    <select id="getById" resultMap="roleBoResult">
+        select role.id role_id,
+        role.code,
+        role.name,
+        role.create_gmt,
+        role.modified_gmt,
+        role_resource.resource_id
+        from role
+        left join role_resource on role.id = role_resource.role_id
+        where role.id = #{id}
+    </select>
+</mapper>

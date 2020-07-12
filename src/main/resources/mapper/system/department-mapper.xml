@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.wangcaitao.admin.system.mapper.DepartmentMapper">
+
+    <select id="listChildren" resultType="DepartmentBO">
+        select
+        department.id,
+        department.name,
+        department.create_gmt,
+        department.modified_gmt
+        from department
+        left join department_relation on department.id = department_relation.child_id
+        <where>
+            <choose>
+                <when test="null != parentId and parentId > 0">
+                    and department_relation.parent_id = #{parentId}
+                    and department_relation.depth = 1
+                </when>
+                <otherwise>
+                    and department.top_status_code = 1
+                </otherwise>
+            </choose>
+            <if test="null != name and '' != name">
+                and department.name like concat(#{name}, '%')
+            </if>
+        </where>
+        order by department.sort asc
+    </select>
+
+    <select id="getMaxSortByParentId" resultType="Integer">
+        select department.sort
+        from department
+        left join department_relation on department.id = department_relation.child_id
+        where department_relation.parent_id = #{parentId} and depth = 1
+        order by department.sort desc
+        limit 1
+    </select>
+
+    <select id="getAdjoinEntity" resultType="DepartmentDO">
+        select
+        department.id,
+        department.sort
+        from department
+        left join department_relation on department.id = department_relation.child_id
+        where department_relation.parent_id = #{parentId}
+        and department_relation.depth = 1
+        <choose>
+            <when test="1 == moveTypeCode">
+                and department.sort &lt; #{sort}
+                order by department.sort desc
+                limit 1
+            </when>
+            <when test="2 == moveTypeCode">
+                and department.sort &gt; #{sort}
+                order by department.sort ASC
+                limit 1
+            </when>
+        </choose>
+    </select>
+
+    <select id="listTreeChildren" resultType="DepartmentTreeBO">
+        select
+        department.id,
+        department.name
+        from department
+        left join department_relation on department.id = department_relation.child_id
+        <where>
+            <choose>
+                <when test="null != parentId and parentId > 0">
+                    and department_relation.parent_id = #{parentId}
+                    and department_relation.depth = 1
+                </when>
+                <otherwise>
+                    and department.top_status_code = 1
+                </otherwise>
+            </choose>
+        </where>
+        order by department.sort asc
+    </select>
+
+    <select id="validateNameExist" resultType="Integer">
+        select count(*)
+        from department
+        left join department_relation on department.id = department_relation.child_id
+        <where>
+            <choose>
+                <when test="null != parentId and parentId > 0">
+                    and department_relation.parent_id = #{parentId}
+                    and department_relation.depth = 1
+                </when>
+                <otherwise>
+                    and department.top_status_code = 1
+                </otherwise>
+            </choose>
+            and department.name = #{name}
+            <if test="null != id">and department.id != #{id}</if>
+        </where>
+    </select>
+</mapper>
