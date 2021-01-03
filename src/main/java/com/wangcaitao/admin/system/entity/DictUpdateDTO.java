@@ -1,6 +1,7 @@
 package com.wangcaitao.admin.system.entity;
 
 import lombok.Data;
+import org.apache.commons.lang3.StringUtils;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -23,7 +24,6 @@ public class DictUpdateDTO implements Serializable {
     /**
      * 编码
      */
-    @NotBlank(message = "code 不能为空")
     @Size(max = 30, message = "code 最大 30 个字符")
     private String code;
 
@@ -33,4 +33,8 @@ public class DictUpdateDTO implements Serializable {
     @NotBlank(message = "name 不能为空")
     @Size(max = 30, message = "name 最大 30 个字符")
     private String name;
+
+    public String getCode() {
+        return StringUtils.isBlank(code) ? "" : code;
+    }
 }

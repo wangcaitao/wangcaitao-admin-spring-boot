@@ -122,28 +122,29 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, DictDO> implements 
 
         String parentCode = dictDo.getParentCode();
         String code = entity.getCode();
-        if (StringUtils.isNotEmpty(code)) {
-            code = code.replaceAll(CharConstant.UNDERLINE, CharConstant.HYPHEN);
-            validateCodeExist(id, parentCode, code);
+        if (StringUtils.isEmpty(parentCode)) {
+            if (StringUtils.isBlank(code)) {
+                return ResultUtils.error("code 不能为空");
+            }
         }
+
+        code = code.replaceAll(CharConstant.UNDERLINE, CharConstant.HYPHEN);
+        validateCodeExist(id, parentCode, code);
 
         DictDO updateDictDo = JacksonUtils.convertObject(entity, DictDO.class);
         updateDictDo.setCode(code);
 
         if (updateById(updateDictDo)) {
             String originCode = dictDo.getCode();
-            if (StringUtils.isNotEmpty(code)) {
-                if (StringUtils.isEmpty(parentCode)) {
-                    Wrapper<DictDO> childrenUpdateWrapper = new UpdateWrapper<DictDO>()
-                            .set("parent_code", code)
-                            .eq("parent_code", originCode);
+            if (StringUtils.isEmpty(parentCode)) {
+                Wrapper<DictDO> childrenUpdateWrapper = new UpdateWrapper<DictDO>()
+                        .set("parent_code", code)
+                        .eq("parent_code", originCode);
 
-                    update(childrenUpdateWrapper);
-                }
-
-                deleteCache(parentCode, code);
+                update(childrenUpdateWrapper);
             }
 
+            deleteCache(parentCode, code);
             deleteCache(parentCode, originCode);
 
             return ResultUtils.success();
@@ -188,7 +189,7 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, DictDO> implements 
         }
 
         Integer currentSort = currentEntity.getSort();
-        Wrapper<DictDO> adjoinDueryWrapper = new QueryWrapper<DictDO>()
+        Wrapper<DictDO> adjoinQueryWrapper = new QueryWrapper<DictDO>()
                 .select("id", "sort")
                 .eq("parent_code", parentCode)
                 .lt(Objects.equals(CommonDictCodeConstant.MOVE_TYPE_UP, moveTypeCode), "sort", currentSort)
@@ -196,7 +197,7 @@ public class DictServiceImpl extends ServiceImpl<DictMapper, DictDO> implements 
                 .gt(Objects.equals(CommonDictCodeConstant.MOVE_TYPE_DOWN, moveTypeCode), "sort", currentSort)
                 .orderBy(Objects.equals(CommonDictCodeConstant.MOVE_TYPE_DOWN, moveTypeCode), true, "sort")
                 .last("limit 1");
-        DictDO adjoinEntity = getOne(adjoinDueryWrapper);
+        DictDO adjoinEntity = getOne(adjoinQueryWrapper);
         if (null == adjoinEntity) {
             ConditionUtils.judgeMoveTypeCode(moveTypeCode);
         } else {
